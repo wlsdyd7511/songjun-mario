@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 pygame.init()
 pygame.display.set_caption('Songjun')
@@ -6,8 +7,12 @@ bg_color = [2, 64, 77]
 
 
 def main():
-    with open('map/map1 숫자.txt', 'r') as f:
-        map = [list(n.rstrip('\n')) for n in f.readlines()]
+    if len(sys.argv) > 1:
+        with open('map/map2 숫자.txt', 'r') as f:
+            map = [list(n.rstrip('\n')) for n in f.readlines()]
+    else:
+        with open('map/map1 숫자.txt', 'r') as f:
+            map = [list(n.rstrip('\n')) for n in f.readlines()]
     width = len(map[0])
     height = len(map)
     screen = pygame.display.set_mode((width*16, height*16))
@@ -53,10 +58,8 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     is_left = True
-                    print('Dleft')
                 elif event.key == pygame.K_RIGHT:
                     is_right = True
-                    print('Dright')
                 elif event.key == pygame.K_UP:
                     if is_bottom:
                         spd[1] = jump_spd
@@ -64,11 +67,8 @@ def main():
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     is_left = False
-                    print('Uleft')
                 elif event.key == pygame.K_RIGHT:
                     is_right = False
-                    print('Uright')
-
         if not is_bottom:
             spd[1] += gravity
 
@@ -126,7 +126,6 @@ def main():
         screen.blit(char[0], tuple(position))
 
         char_block = [int(n//16) for n in position]
-        print(f'{position}\n{char_block}')
         if position[0]%16:
             under_block = [map[char_block[1]+1][char_block[0]], map[char_block[1]+1][char_block[0]+1]]
         else:
@@ -163,7 +162,6 @@ def main():
             if spd[0] < 0:
                 spd[0] = 0
                 position[0] = (char_block[0]+1) * 16
-        print(map[int(char_block[1])][int(char_block[0])])
         if map[int(char_block[1])][int(char_block[0])] == '5':
             level()
 
