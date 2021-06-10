@@ -5,6 +5,7 @@ pygame.init()
 pygame.display.set_caption('Songjun')
 bg_color = [2, 64, 77]
 END_LEVEL = 2
+comicSans = pygame.font.SysFont('comicsansms', 24, True, False)
 
 
 def main():
@@ -16,6 +17,9 @@ def main():
     height = len(map)
     screen = pygame.display.set_mode((width*16, height*16))
     fps = pygame.time.Clock()
+    clear = False
+
+    walk = True
 
     char = [pygame.image.load('image/player/right1.png'), pygame.image.load('image/player/right2.png'), pygame.image.load('image/player/left1.png'), pygame.image.load('image/player/left2.png')]
 #     for i in range(len(char)):
@@ -30,6 +34,7 @@ def main():
     is_right = False
     is_left = False
     direction = 0  # 0: stop, -1: left, 1: right
+    recent_direction = 0
 
     grass = pygame.image.load('image/grass/grass.png')
     onlydirt = pygame.image.load('image/grass/grass2.png')
@@ -52,6 +57,7 @@ def main():
             if current_level == END_LEVEL:
                 with open('map/clear.txt', 'r') as f:
                     map = [list(n.rstrip('\n')) for n in f.readlines()]
+                    clear = True
             else:
                 with open(f'map/map{level} 숫자.txt', 'r') as f:
                     map = [list(n.rstrip('\n')) for n in f.readlines()]
@@ -73,6 +79,10 @@ def main():
                         is_bottom = False
                 elif event.key == pygame.K_LSHIFT:
                     MAX_SPD = 4
+                elif event.key == pygame.K_ESCAPE:
+                    if clear:
+                        pygame.quit()
+                        sys.quit()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     is_left = False
@@ -112,9 +122,6 @@ def main():
 
         position[0] += spd[0]
         position[1] += spd[1]
-        print(position)
-        print(width)
-        print()
 
         if position[0] <= 1:
             position[0] = 1
@@ -126,7 +133,7 @@ def main():
                 spd[0] = 0
 
         if position[1] > (height * 16) - 16:
-            spawn(height, width, map)
+            position = spawn(height, width, map)
 
         screen.fill(tuple(bg_color))
         for h in range(height):
@@ -138,18 +145,65 @@ def main():
                 elif map[h][w] == '3':
                     screen.blit(spike[1], (w*16, h*16))
                 elif map[h][w] == '5':
-                    screen.blit(flag, (w*16, h*16))
+                    if map[h-1][w] != '5':
+                        screen.blit(flag, (w*16, h*16))
                 elif map[h][w] == '6':
-                    screen.blit(fake, (w*16, h*16))
+                    if map[h-1][w] != '6':
+                        screen.blit(fake, (w*16, h*16))
                 elif map[h][w] == '7':
-                    screen.blit(portal, (w*16, h*16))
+                    if w != 0:
+                        if map[h-1][w-1] != '7' and map[h-1][w] != '7' and map[h][w-1] != '7':
+                            screen.blit(portal, (w*16, h*16))
+                    else:
+                        if map[h-1][w] != '7':
+                            screen.blit(portal, (w*16, h*16))
                 elif map[h][w] == '8':
                     screen.blit(darkgrass, (w*16, h*16))
                 elif map[h][w] == '9':
                     screen.blit(onlydirt, (w*16, h*16))
                 elif map[h][w] == '4':
-                    screen.blit(chest, (w*16, h*16))
-        screen.blit(char[0], tuple(position))
+                    if map[h-1][w-1] != '4' and map[h-1][w] != '4' and map[h][w-1] != '4':
+                        screen.blit(chest, (w*16, h*16))
+        
+        if clear:
+            clear_text = comicSans.render("Press 'esc' to exit", True, (0, 0, 0))
+            text_rect = clear_text.get_rect()
+            text_rect.centerx = round(width*8)
+            text_rect.y = height*16 - 128
+
+            screen.blit(clear_text, text_rect)
+
+        if walk:
+            if direction < 0:
+                screen.blit(char[2], tuple(position))
+                recent_direction = -1
+                walk = not walk
+            elif direction > 0:
+                screen.blit(char[0], tuple(position))
+                recent_direction = 1
+                walk = not walk
+            else:
+                if recent_direction > 0:
+                    screen.blit(char[0], tuple(position))
+                else:
+                    screen.blit(char[2], tuple(position))
+        else:
+            if direction < 0:
+                screen.blit(char[3], tuple(position))
+                recent_direction = -1
+                walk = not walk
+            elif direction > 0:
+                screen.blit(char[1], tuple(position))
+                recent_direction = 1
+                walk = not walk
+            else:
+                if recent_direction > 0:
+                    screen.blit(char[0], tuple(position))
+                else:
+                    screen.blit(char[2], tuple(position))
+
+                
+#         screen.blit(char[0], tuple(position))
 
         char_block = [int(n//16) for n in position]
         if position[0]%16:
@@ -210,14 +264,6 @@ def main():
         pygame.display.update()
         fps.tick(60)
 
-def level():
-    print('level')
-    with open('map/map2 숫자.txt', 'r') as f:
-            map = [list(n.rstrip('\n')) for n in f.readlines()]
-
-
-def death():
-    print('death')
 
 def spawn(height, width, map):
     porition = [0, 0]
