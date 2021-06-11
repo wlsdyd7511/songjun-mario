@@ -4,7 +4,7 @@ import sys
 pygame.init()
 pygame.display.set_caption('Songjun')
 bg_color = [2, 64, 77]
-END_LEVEL = 2
+END_LEVEL = 3
 comicSans = pygame.font.SysFont('comicsansms', 24, True, False)
 
 
@@ -49,6 +49,7 @@ def main():
     fake = pygame.transform.scale(fake, (16, 32))
     portal = pygame.image.load('image/portal/portal.png')
     portal = pygame.transform.scale(portal, (32, 32))
+    moss = pygame.image.load('image/block/block2.png')
     position = spawn(height, width, map)
 
 
@@ -164,6 +165,8 @@ def main():
                 elif map[h][w] == '4':
                     if map[h-1][w-1] != '4' and map[h-1][w] != '4' and map[h][w-1] != '4':
                         screen.blit(chest, (w*16, h*16))
+                elif map[h][w] == '#':
+                    screen.blit(moss, (w*16, h*16))
         
         if clear:
             clear_text = comicSans.render("Press 'esc' to exit", True, (0, 0, 0))
@@ -210,7 +213,7 @@ def main():
             under_block = [map[char_block[1]+1][char_block[0]], map[char_block[1]+1][char_block[0]+1]]
         else:
             under_block = [map[char_block[1]+1][char_block[0]]]
-        if ('1' in under_block or '2' in under_block or '8' in under_block or '9' in under_block):
+        if '1' in under_block or '2' in under_block or '8' in under_block or '9' in under_block or '#' in under_block:
             is_bottom = True
             spd[1] = 0
             position[1] = char_block[1]*16
@@ -230,13 +233,13 @@ def main():
             else:
                 left_block = [map[char_block[1]][char_block[0]], map[char_block[1]+1][char_block[0]]]
 
-        if '1' in right_block or '2' in right_block or '8' in right_block or '9' in right_block:
+        if '1' in right_block or '2' in right_block or '8' in right_block or '9' in right_block or '#' in right_block:
             if direction > 0:
                 direction = 0
             if spd[0] > 0:
                 spd[0] = 0
                 position[0] = char_block[0] * 16
-        if '1' in left_block or '2' in left_block or '8' in left_block or '9' in left_block:
+        if '1' in left_block or '2' in left_block or '8' in left_block or '9' in left_block or '#' in right_block:
             if direction < 0:
                 direction = 0
             if spd[0] < 0:
